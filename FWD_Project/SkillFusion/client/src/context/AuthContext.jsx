@@ -2,6 +2,9 @@ import { createContext, useState, useEffect, useContext } from 'react';
 
 const AuthContext = createContext();
 
+// Ensure no trailing slash
+const API_URL = (import.meta.env.VITE_API_URL || 'http://localhost:5000').replace(/\/$/, '');
+
 export const useAuth = () => useContext(AuthContext);
 
 export const AuthProvider = ({ children }) => {
@@ -17,7 +20,7 @@ export const AuthProvider = ({ children }) => {
 
     const login = async (username, password) => {
         try {
-            const res = await fetch('http://localhost:5000/auth/login', {
+            const res = await fetch(`${API_URL}/auth/login`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ username, password }),
@@ -39,7 +42,7 @@ export const AuthProvider = ({ children }) => {
 
     const signup = async (userData) => {
         try {
-            const res = await fetch('http://localhost:5000/auth/register', {
+            const res = await fetch(`${API_URL}/auth/register`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(userData),
@@ -67,22 +70,32 @@ export const AuthProvider = ({ children }) => {
     const updateUser = (updatedUserData) => {
         setUser(updatedUserData);
         sessionStorage.setItem('user', JSON.stringify(updatedUserData));
-        // Also update local storage if it was used there to prevent mismatch? 
-        // No, we are moving entirely to sessionStorage.
     };
 
     const checkUsernameAvailability = async (username) => {
         try {
-            const res = await fetch('http://localhost:5000/auth/check-username', {
+            const res = await fetch(`${API_URL}/auth/check-username`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ username }),
             });
+
+            if (!res.ok) {
+                // Try to parse error message, fallback to status text
+                let errorMessage = `Server Error: ${res.status}`;
+                try {
+                    const errorData = await res.json();
+                    if (errorData.message) errorMessage = errorData.message;
+                } catch (e) { /* ignore json parse error */ }
+
+                return { available: false, error: errorMessage };
+            }
+
             const data = await res.json();
-            return data.available;
+            return { available: data.available, error: null };
         } catch (error) {
             console.error("Username check error", error);
-            return false;
+            return { available: false, error: "Network Error: Could not connect to server." };
         }
     };
 

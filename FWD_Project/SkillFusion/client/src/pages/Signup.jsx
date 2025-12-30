@@ -43,13 +43,19 @@ const Signup = () => {
         setUsernameStatus('checking');
         setUsernameMessage('Checking availability...');
 
-        const available = await checkUsernameAvailability(username);
+        const result = await checkUsernameAvailability(username);
+
+        // Handle the new object response or fallback for old boolean response
+        const available = typeof result === 'object' ? result.available : result;
+        const errorMessage = typeof result === 'object' ? result.error : null;
+
         if (available) {
             setUsernameStatus('available');
             setUsernameMessage('✓ Username is available');
         } else {
             setUsernameStatus('taken');
-            setUsernameMessage('Username is already taken');
+            // If we have a specific error (like Network Error), show that. Otherwise default to "taken".
+            setUsernameMessage(errorMessage ? `Error: ${errorMessage}` : 'Username is already taken');
         }
     };
 
