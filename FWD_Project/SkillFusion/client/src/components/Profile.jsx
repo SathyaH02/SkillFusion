@@ -34,6 +34,8 @@ const SKILL_OPTIONS = [
 const Profile = () => {
     const { user, updateUser } = useAuth();
     const navigate = useNavigate();
+    // Ensure no trailing slash
+    const API_URL = (import.meta.env.VITE_API_URL || 'http://localhost:5000').replace(/\/$/, '');
 
     const [formData, setFormData] = useState({
         bio: user?.bio || '',
@@ -45,7 +47,7 @@ const Profile = () => {
 
     useEffect(() => {
         if (user && user.role === 'student') {
-            fetch(`http://localhost:5000/api/dashboard/student/${user._id}`)
+            fetch(`${API_URL}/api/dashboard/student/${user._id}`)
                 .then(res => res.json())
                 .then(data => {
                     const active = data
@@ -75,7 +77,7 @@ const Profile = () => {
     const handleSubmit = async (e) => {
         e.preventDefault();
         try {
-            const res = await fetch(`http://localhost:5000/api/profile/${user._id}`, {
+            const res = await fetch(`${API_URL}/api/profile/${user._id}`, {
                 method: 'PUT',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(formData)

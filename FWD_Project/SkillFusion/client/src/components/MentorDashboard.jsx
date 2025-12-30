@@ -4,6 +4,8 @@ import DashboardLayout from './DashboardLayout';
 
 const MentorDashboard = () => {
     const { user } = useAuth();
+    // Ensure no trailing slash
+    const API_URL = (import.meta.env.VITE_API_URL || 'http://localhost:5000').replace(/\/$/, '');
     const [dashboardUser, setDashboardUser] = useState(user || {});
     const [requests, setRequests] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -15,8 +17,8 @@ const MentorDashboard = () => {
     const fetchData = async () => {
         try {
             const [mentorDataRes, userDataRes] = await Promise.all([
-                fetch(`http://localhost:5000/api/dashboard/mentor/${user._id}`),
-                fetch(`http://localhost:5000/api/profile/${user._id}`)
+                fetch(`${API_URL}/api/dashboard/mentor/${user._id}`),
+                fetch(`${API_URL}/api/profile/${user._id}`)
             ]);
 
             const mentorData = await mentorDataRes.json();
@@ -36,7 +38,7 @@ const MentorDashboard = () => {
 
     const handleAccept = async (mentorshipId) => {
         try {
-            const res = await fetch('http://localhost:5000/api/accept', {
+            const res = await fetch(`${API_URL}/api/accept`, {
                 method: 'PUT',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ mentorshipId })
@@ -49,7 +51,7 @@ const MentorDashboard = () => {
         if (!window.confirm("Are you sure you want to reject this request?")) return;
         console.log("Rejecting:", mentorshipId);
         try {
-            const res = await fetch('http://localhost:5000/api/reject', {
+            const res = await fetch(`${API_URL}/api/reject`, {
                 method: 'PUT',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ mentorshipId })
@@ -60,7 +62,7 @@ const MentorDashboard = () => {
 
     const handleUpdateProgress = async (mentorshipId, newProgress) => {
         try {
-            const res = await fetch('http://localhost:5000/api/progress', {
+            const res = await fetch(`${API_URL}/api/progress`, {
                 method: 'PUT',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ mentorshipId, progress: parseInt(newProgress) })

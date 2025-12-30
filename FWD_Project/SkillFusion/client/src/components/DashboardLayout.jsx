@@ -23,6 +23,8 @@ const QUOTES = [
 const DashboardLayout = ({ children }) => {
     const { user, logout } = useAuth();
     const navigate = useNavigate();
+    // Ensure no trailing slash
+    const API_URL = (import.meta.env.VITE_API_URL || 'http://localhost:5000').replace(/\/$/, '');
     const [notifications, setNotifications] = useState([]);
     const [showNotifications, setShowNotifications] = useState(false);
     const [quote, setQuote] = useState('');
@@ -41,7 +43,7 @@ const DashboardLayout = ({ children }) => {
 
     const fetchNotifications = async () => {
         try {
-            const res = await fetch('http://localhost:5000/api/notifications/' + user._id);
+            const res = await fetch(`${API_URL}/api/notifications/` + user._id);
             const data = await res.json();
             setNotifications(data);
         } catch (err) {
@@ -51,7 +53,7 @@ const DashboardLayout = ({ children }) => {
 
     const handleRead = async (id) => {
         try {
-            await fetch('http://localhost:5000/api/notifications/' + id + '/read', { method: 'PUT' });
+            await fetch(`${API_URL}/api/notifications/` + id + '/read', { method: 'PUT' });
             setNotifications(notifications.map(n => n._id === id ? { ...n, read: true } : n));
         } catch (err) { console.error(err); }
     };
@@ -156,7 +158,7 @@ const DashboardLayout = ({ children }) => {
                                                                     onClick={async () => {
                                                                         if (window.confirm(`Rate this mentor ${star} stars?`)) {
                                                                             try {
-                                                                                await fetch('http://localhost:5000/api/rate-mentor', {
+                                                                                await fetch(`${API_URL}/api/rate-mentor`, {
                                                                                     method: 'POST',
                                                                                     headers: { 'Content-Type': 'application/json' },
                                                                                     body: JSON.stringify({ mentorshipId: n.relatedId, rating: star, notificationId: n._id })

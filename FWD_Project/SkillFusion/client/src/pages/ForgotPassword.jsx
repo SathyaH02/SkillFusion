@@ -2,6 +2,8 @@ import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 
 const ForgotPassword = () => {
+    // Ensure no trailing slash
+    const API_URL = (import.meta.env.VITE_API_URL || 'http://localhost:5000').replace(/\/$/, '');
     const [email, setEmail] = useState('');
     const [message, setMessage] = useState('');
     const [error, setError] = useState('');
@@ -12,7 +14,7 @@ const ForgotPassword = () => {
         setMessage('');
         setError('');
         try {
-            const res = await fetch('http://localhost:5000/auth/forgot-password', {
+            const res = await fetch(`${API_URL}/auth/forgot-password`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ email })

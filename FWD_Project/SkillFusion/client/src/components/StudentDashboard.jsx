@@ -4,6 +4,8 @@ import DashboardLayout from './DashboardLayout';
 
 const StudentDashboard = () => {
     const { user, updateUser } = useAuth();
+    // Ensure no trailing slash
+    const API_URL = (import.meta.env.VITE_API_URL || 'http://localhost:5000').replace(/\/$/, '');
     const [allMentorships, setAllMentorships] = useState([]);
     const [mentors, setMentors] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -15,18 +17,18 @@ const StudentDashboard = () => {
         const fetchData = async () => {
             try {
                 // 0. Fetch fresh user profile to get updated skillsToLearn
-                const resProfile = await fetch(`http://localhost:5000/api/profile/${user._id}`);
+                const resProfile = await fetch(`${API_URL}/api/profile/${user._id}`);
                 const freshUserData = await resProfile.json();
                 // Update user context with fresh data
                 updateUser(freshUserData);
 
                 // 1. Get student's mentorships
-                const resMentorships = await fetch(`http://localhost:5000/api/dashboard/student/${user._id}`);
+                const resMentorships = await fetch(`${API_URL}/api/dashboard/student/${user._id}`);
                 const dataMentorships = await resMentorships.json();
                 setAllMentorships(dataMentorships || []);
 
                 // 2. Get available mentors
-                const resMentors = await fetch('http://localhost:5000/api/mentors');
+                const resMentors = await fetch(`${API_URL}/api/mentors`);
                 const allMentors = await resMentors.json();
 
                 // Filter mentors based on FRESH skills data
@@ -49,7 +51,7 @@ const StudentDashboard = () => {
 
     const handleRequest = async (mentorId, skill) => {
         try {
-            const res = await fetch('http://localhost:5000/api/request', {
+            const res = await fetch(`${API_URL}/api/request`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ studentId: user._id, mentorId, skill })
@@ -76,7 +78,7 @@ const StudentDashboard = () => {
                 updatedSkills.push(skill);
             }
 
-            const res = await fetch(`http://localhost:5000/api/profile/${user._id}`, {
+            const res = await fetch(`${API_URL}/api/profile/${user._id}`, {
                 method: 'PUT',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
@@ -109,7 +111,7 @@ const StudentDashboard = () => {
         }
 
         try {
-            const res = await fetch('http://localhost:5000/api/cancel', {
+            const res = await fetch(`${API_URL}/api/cancel`, {
                 method: 'PUT',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ mentorshipId })

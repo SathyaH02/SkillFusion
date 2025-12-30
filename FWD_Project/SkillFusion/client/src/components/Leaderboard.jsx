@@ -2,6 +2,8 @@ import React, { useEffect, useState } from 'react';
 import DashboardLayout from './DashboardLayout';
 
 const Leaderboard = () => {
+    // Ensure no trailing slash
+    const API_URL = (import.meta.env.VITE_API_URL || 'http://localhost:5000').replace(/\/$/, '');
     const [leaders, setLeaders] = useState([]);
     const [loading, setLoading] = useState(true);
 
@@ -11,7 +13,7 @@ const Leaderboard = () => {
 
     const fetchLeaders = async () => {
         try {
-            const res = await fetch('http://localhost:5000/api/leaderboard');
+            const res = await fetch(`${API_URL}/api/leaderboard`);
             const data = await res.json();
             setLeaders(data);
             setLoading(false);
