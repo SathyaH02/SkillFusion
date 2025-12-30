@@ -322,4 +322,71 @@ router.put('/profile/:userId', async (req, res) => {
     }
 });
 
+// TEMPORARY: Admin endpoint to fix usernames in production
+// Remove this after running once
+router.post('/admin/fix-usernames', async (req, res) => {
+    try {
+        const { adminSecret } = req.body;
+
+        // Simple security check
+        if (adminSecret !== 'FixUsernames2024!') {
+            return res.status(403).json({ error: 'Unauthorized' });
+        }
+
+        const usernameMappings = {
+            'priya@demo.com': 'priya',
+            'rahul@demo.com': 'rahul',
+            'ananya@demo.com': 'ananya',
+            'arjun@demo.com': 'arjun',
+            'sneha@demo.com': 'sneha',
+            'vikram@demo.com': 'vikram',
+            'test1@demo.com': 'test1',
+            'test2@demo.com': 'test2'
+        };
+
+        const usersWithoutUsernames = await User.find({ username: { $exists: false } });
+
+        if (usersWithoutUsernames.length === 0) {
+            return res.json({
+                success: true,
+                message: 'All users already have usernames!',
+                credentials: await User.find({ email: { $regex: '@demo.com$' } }).select('username email role')
+            });
+        }
+
+        const credentials = [];
+
+        for (const user of usersWithoutUsernames) {
+            let username = usernameMappings[user.email] || user.email.split('@')[0].toLowerCase();
+            username = username.replace(/[^a-z0-9_]/g, '_');
+            if (username.length > 20) username = username.substring(0, 20);
+
+            let finalUsername = username;
+            let counter = 1;
+            while (await User.findOne({ username: finalUsername })) {
+                finalUsername = `${username}${counter}`;
+                counter++;
+            }
+
+            user.username = finalUsername;
+            await user.save();
+
+            credentials.push({
+                name: user.name,
+                username: finalUsername,
+                email: user.email,
+                role: user.role
+            });
+        }
+
+        res.json({
+            success: true,
+            message: `Fixed ${credentials.length} users`,
+            credentials
+        });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
 module.exports = router;

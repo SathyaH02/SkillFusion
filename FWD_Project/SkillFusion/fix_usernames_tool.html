@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fix Production Usernames</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            max-width: 600px;
+            margin: 50px auto;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+        h1 {
+            color: #333;
+            margin-bottom: 10px;
+        }
+        .subtitle {
+            color: #666;
+            margin-bottom: 30px;
+        }
+        input {
+            width: 100%;
+            padding: 12px;
+            margin-bottom: 15px;
+            border: 2px solid #ddd;
+            border-radius: 5px;
+            font-size: 16px;
+            box-sizing: border-box;
+        }
+        button {
+            width: 100%;
+            padding: 12px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+        button:hover {
+            transform: translateY(-2px);
+        }
+        button:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+        #result {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 5px;
+            display: none;
+        }
+        .success {
+            background: #d4edda;
+            border: 1px solid #c3e6cb;
+            color: #155724;
+        }
+        .error {
+            background: #f8d7da;
+            border: 1px solid #f5c6cb;
+            color: #721c24;
+        }
+        .credentials {
+            margin-top: 15px;
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 5px;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+        }
+        .credential-item {
+            margin: 8px 0;
+            padding: 8px;
+            background: white;
+            border-left: 3px solid #667eea;
+        }
+        .info {
+            background: #d1ecf1;
+            border: 1px solid #bee5eb;
+            color: #0c5460;
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔧 Fix Production Usernames</h1>
+        <p class="subtitle">Add usernames to demo users in your deployed database</p>
+        
+        <div class="info">
+            <strong>Instructions:</strong><br>
+            1. Enter your deployed app URL (e.g., https://your-app.onrender.com)<br>
+            2. Click "Fix Usernames"<br>
+            3. Use the displayed credentials to login
+        </div>
+
+        <input 
+            type="text" 
+            id="appUrl" 
+            placeholder="https://your-app.onrender.com"
+            value=""
+        >
+        
+        <button onclick="fixUsernames()" id="fixBtn">Fix Usernames</button>
+        
+        <div id="result"></div>
+    </div>
+
+    <script>
+        async function fixUsernames() {
+            const appUrl = document.getElementById('appUrl').value.trim();
+            const resultDiv = document.getElementById('result');
+            const btn = document.getElementById('fixBtn');
+            
+            if (!appUrl) {
+                resultDiv.className = 'error';
+                resultDiv.style.display = 'block';
+                resultDiv.innerHTML = '❌ Please enter your app URL';
+                return;
+            }
+
+            btn.disabled = true;
+            btn.textContent = 'Fixing...';
+            resultDiv.style.display = 'none';
+
+            try {
+                const response = await fetch(`${appUrl}/api/admin/fix-usernames`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        adminSecret: 'FixUsernames2024!'
+                    })
+                });
+
+                const data = await response.json();
+
+                if (response.ok && data.success) {
+                    resultDiv.className = 'success';
+                    resultDiv.style.display = 'block';
+                    
+                    let html = `<strong>✅ ${data.message}</strong>`;
+                    
+                    if (data.credentials && data.credentials.length > 0) {
+                        html += '<div class="credentials"><strong>Login Credentials:</strong>';
+                        
+                        const students = data.credentials.filter(c => c.role === 'student');
+                        const mentors = data.credentials.filter(c => c.role === 'mentor');
+                        
+                        if (students.length > 0) {
+                            html += '<br><br><strong>Students:</strong>';
+                            students.forEach(c => {
+                                html += `<div class="credential-item">Username: <strong>${c.username}</strong> | Password: <strong>Demo123!</strong></div>`;
+                            });
+                        }
+                        
+                        if (mentors.length > 0) {
+                            html += '<br><strong>Mentors:</strong>';
+                            mentors.forEach(c => {
+                                html += `<div class="credential-item">Username: <strong>${c.username}</strong> | Password: <strong>Demo123!</strong></div>`;
+                            });
+                        }
+                        
+                        html += '</div>';
+                    }
+                    
+                    resultDiv.innerHTML = html;
+                } else {
+                    throw new Error(data.error || 'Failed to fix usernames');
+                }
+            } catch (error) {
+                resultDiv.className = 'error';
+                resultDiv.style.display = 'block';
+                resultDiv.innerHTML = `<strong>❌ Error:</strong> ${error.message}<br><br>Make sure your app URL is correct and the app is deployed.`;
+            } finally {
+                btn.disabled = false;
+                btn.textContent = 'Fix Usernames';
+            }
+        }
+
+        // Allow Enter key to submit
+        document.getElementById('appUrl').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                fixUsernames();
+            }
+        });
+    </script>
+</body>
+</html>

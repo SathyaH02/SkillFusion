@@ -32,6 +32,7 @@ const seedDemoUsers = async () => {
         console.log('Creating students...');
 
         const priya = await User.create({
+            username: 'priya',
             name: 'Priya Sharma',
             email: 'priya@demo.com',
             password: password,
@@ -47,6 +48,7 @@ const seedDemoUsers = async () => {
         });
 
         const rahul = await User.create({
+            username: 'rahul',
             name: 'Rahul Verma',
             email: 'rahul@demo.com',
             password: password,
@@ -70,6 +72,7 @@ const seedDemoUsers = async () => {
         });
 
         const ananya = await User.create({
+            username: 'ananya',
             name: 'Ananya Patel',
             email: 'ananya@demo.com',
             password: password,
@@ -96,6 +99,7 @@ const seedDemoUsers = async () => {
         console.log('Creating mentors...');
 
         const arjun = await User.create({
+            username: 'arjun',
             name: 'Arjun Singh',
             email: 'arjun@demo.com',
             password: password,
@@ -119,6 +123,7 @@ const seedDemoUsers = async () => {
         });
 
         const sneha = await User.create({
+            username: 'sneha',
             name: 'Sneha Reddy',
             email: 'sneha@demo.com',
             password: password,
@@ -156,6 +161,7 @@ const seedDemoUsers = async () => {
         });
 
         const vikram = await User.create({
+            username: 'vikram',
             name: 'Vikram Kumar',
             email: 'vikram@demo.com',
             password: password,
@@ -265,6 +271,7 @@ const seedDemoUsers = async () => {
 
         // sneha's completed mentorships (for Mentor Star badge)
         const dummyStudent1 = await User.create({
+            username: 'test1',
             name: 'Test Student 1',
             email: 'test1@demo.com',
             password: password,
@@ -276,6 +283,7 @@ const seedDemoUsers = async () => {
         });
 
         const dummyStudent2 = await User.create({
+            username: 'test2',
             name: 'Test Student 2',
             email: 'test2@demo.com',
             password: password,
@@ -367,14 +375,14 @@ const seedDemoUsers = async () => {
         console.log('\n✅ Demo data seeded successfully!\n');
         console.log('=== DEMO USER ACCOUNTS ===\n');
         console.log('STUDENTS:');
-        console.log('1. Priya Sharma - priya@demo.com (Beginner, pending request)');
-        console.log('2. Rahul Verma - rahul@demo.com (Active student, 150 XP, 1 badge)');
-        console.log('3. Ananya Patel - ananya@demo.com (Advanced, 500 XP, multiple completions)\n');
+        console.log('1. Username: priya    | Email: priya@demo.com   | Password: Demo123!');
+        console.log('2. Username: rahul    | Email: rahul@demo.com   | Password: Demo123!');
+        console.log('3. Username: ananya   | Email: ananya@demo.com  | Password: Demo123!\n');
         console.log('MENTORS:');
-        console.log('4. Arjun Singh - arjun@demo.com (New mentor, pending requests)');
-        console.log('5. Sneha Reddy - sneha@demo.com (Experienced, 850 XP, 3 badges)');
-        console.log('6. Vikram Kumar - vikram@demo.com (Top mentor, 1250 XP, 4 badges)\n');
-        console.log('Password for all accounts: Demo123!\n');
+        console.log('4. Username: arjun    | Email: arjun@demo.com   | Password: Demo123!');
+        console.log('5. Username: sneha    | Email: sneha@demo.com   | Password: Demo123!');
+        console.log('6. Username: vikram   | Email: vikram@demo.com  | Password: Demo123!\n');
+        console.log('⚠️  IMPORTANT: Login with USERNAME, not email!\n');
 
         process.exit(0);
     } catch (err) {
