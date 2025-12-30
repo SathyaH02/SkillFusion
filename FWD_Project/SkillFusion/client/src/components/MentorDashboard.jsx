@@ -61,13 +61,21 @@ const MentorDashboard = () => {
     };
 
     const handleUpdateProgress = async (mentorshipId, newProgress) => {
+        // Validate Input: 0-100, Integer only
+        const progress = Number(newProgress);
+        if (isNaN(progress) || progress < 0 || progress > 100 || !Number.isInteger(progress)) {
+            alert("Please enter a valid whole number between 0 and 100.");
+            return;
+        }
+
         try {
             const res = await fetch(`${API_URL}/api/progress`, {
                 method: 'PUT',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ mentorshipId, progress: parseInt(newProgress) })
+                body: JSON.stringify({ mentorshipId, progress })
             });
             if (res.ok) fetchData();
+            else alert("Failed to update progress");
         } catch (err) { console.error(err); }
     };
 
@@ -213,10 +221,24 @@ const MentorDashboard = () => {
                                                 type="number"
                                                 min="0"
                                                 max="100"
+                                                step="1"
                                                 defaultValue={r.progress}
                                                 className="form-control"
                                                 style={{ width: '80px', padding: '0.25rem' }}
                                                 id={`progress-${r._id}`}
+                                                onKeyDown={(e) => {
+                                                    // Prevent typing decimals (., e)
+                                                    if (e.key === '.' || e.key === 'e' || e.key === 'E' || e.key === '-' || e.key === '+') {
+                                                        e.preventDefault();
+                                                    }
+                                                }}
+                                                onInput={(e) => {
+                                                    // Enforce max 100
+                                                    if (e.target.value > 100) e.target.value = 100;
+                                                    if (e.target.value && e.target.value < 0) e.target.value = 0;
+                                                    // Remove leading zeros if not just "0"
+                                                    if (e.target.value.length > 1 && e.target.value.startsWith('0')) e.target.value = parseInt(e.target.value);
+                                                }}
                                             />
                                             <button
                                                 onClick={(e) => {

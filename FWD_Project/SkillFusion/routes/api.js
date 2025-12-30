@@ -94,7 +94,7 @@ router.post('/request', async (req, res) => {
         await new Notification({
             userId: mentorId,
             type: 'request',
-            message: 'Congratulations! You have completed the ' + mentorship.skill + ' course!',
+            message: `New mentorship request: ${student.name} wants to learn ${skill}`,
             relatedId: newMentorship._id
         }).save();
 

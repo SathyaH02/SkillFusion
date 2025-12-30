@@ -57,6 +57,17 @@ const Profile = () => {
                 })
                 .catch(err => console.error("Failed to fetch mentorships", err));
         }
+        if (user && user.role === 'mentor') {
+            fetch(`${API_URL}/api/dashboard/mentor/${user._id}`)
+                .then(res => res.json())
+                .then(data => {
+                    const active = data
+                        .filter(m => m.status === 'accepted')
+                        .map(m => m.skill);
+                    setActiveSkills(active);
+                })
+                .catch(err => console.error("Failed to fetch mentor requests", err));
+        }
     }, [user]);
 
     const handleAvatarSelect = (url) => {
@@ -95,9 +106,10 @@ const Profile = () => {
     };
 
     const toggleSkill = (skill, type) => {
-        // Prevent deselecting active skills for students
-        if (type === 'skillsToLearn' && activeSkills.includes(skill)) {
-            alert(`You cannot remove ${skill} while you have an active mentorship request or are currently learning it.`);
+        // Prevent deselecting active skills for both student and mentor
+        if ((type === 'skillsToLearn' || type === 'skillsToTeach') && activeSkills.includes(skill)) {
+            const roleAction = type === 'skillsToLearn' ? 'learning it' : 'teaching it';
+            alert(`You cannot remove ${skill} while you have an active mentorship or request related to it.`);
             return;
         }
 
@@ -195,16 +207,20 @@ const Profile = () => {
                         <div className="form-group">
                             <label>Skills I Can Teach</label>
                             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(140px, 1fr))', gap: '0.5rem', maxHeight: '300px', overflowY: 'auto', padding: '10px', background: 'white', borderRadius: '8px', border: '1px solid #e2e8f0' }}>
-                                {SKILL_OPTIONS.map(skill => (
-                                    <label key={skill} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.9rem', cursor: 'pointer' }}>
-                                        <input
-                                            type="checkbox"
-                                            checked={formData.skillsToTeach.includes(skill)}
-                                            onChange={() => toggleSkill(skill, 'skillsToTeach')}
-                                        />
-                                        {skill}
-                                    </label>
-                                ))}
+                                {SKILL_OPTIONS.map(skill => {
+                                    const isActive = activeSkills.includes(skill);
+                                    return (
+                                        <label key={skill} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.9rem', cursor: isActive ? 'not-allowed' : 'pointer', color: isActive ? '#64748b' : 'inherit' }}>
+                                            <input
+                                                type="checkbox"
+                                                checked={formData.skillsToTeach.includes(skill)}
+                                                onChange={() => toggleSkill(skill, 'skillsToTeach')}
+                                                disabled={isActive}
+                                            />
+                                            {skill} {isActive && '(Active)'}
+                                        </label>
+                                    );
+                                })}
                             </div>
                         </div>
                     )}
